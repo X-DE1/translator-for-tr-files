@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translator for `.tr` Files</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        input[type="file"] {
+            display: block;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #status {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #e67e22;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 id="heading">Translator for `.tr` Files</h1>
+    <p id="paragraph">Upload your file that has the format English text= in each line of text.</p>
+    
+    <input type="file" id="fileInput" accept=".tr">
+    <div id="status"></div>
+    <button id="downloadBtn">Download translated file</button>
+</div>
+
+<script>
+    const codigoIdioma = navigator.language.toLowerCase().split('-')[0];
+    const heading = document.getElementById('heading');
+    const paragraph = document.getElementById('paragraph');
+    const downloadBtn = document.getElementById('downloadBtn');
+    let reading = "Reading and processing file...";
+    let translating = "Translating line of text:";
+    let complete = "Translation completed successfully!";
+    let apiError = "Google API error";
+    let lineError = "Error translating line of text: ";
+    
+    if (codigoIdioma == "es") {
+		document.title = "Traductor de Archivos `.tr`";
+		heading.textContent = "Traductor de Archivos `.tr`";
+		paragraph.textContent = "Sube tu archivo que tenga el formato Texto en inglés= en cada linea de texto.";
+		downloadBtn.textContent = "Descargar archivo traducido";
+		reading = "Leyendo y procesando archivo...";
+		translating = "Traduciendo línea de texto:";
+		complete = "¡Traducción completada con éxito!";
+		apiError = "Error en la API de Google";
+		lineError = "Error al traducir línea de texto: ";
+	}
+    if (codigoIdioma == "pt") {
+		document.title = "Tradutor para arquivos `.tr`";
+		heading.textContent = "Tradutor para arquivos `.tr`";
+		paragraph.textContent = "Faça o upload do seu arquivo que contenha o texto em inglês no formato Texto em inglês= em cada linha.";
+		downloadBtn.textContent = "Baixar arquivo traduzido";
+		reading = "Lendo e processando o arquivo...";
+		translating = "Traduzindo linha de texto:";
+		complete = "Tradução concluída com sucesso!";
+		apiError = "Erro da API do Google";
+		lineError = "Erro ao traduzir a linha de texto: ";
+	}
+    if (codigoIdioma == "fr") {
+		document.title = "Traducteur pour fichiers `.tr`";
+		heading.textContent = "Traducteur pour fichiers `.tr`";
+		paragraph.textContent = "Téléversez votre fichier dont chaque ligne de texte doit comporter le format suivant : texte anglais =.";
+		downloadBtn.textContent = "Télécharger le fichier traduit";
+		reading = "Lecture et traitement du fichier..."; 
+		translating = "Traduction de la ligne de texte:"; 
+		complete = "Traduction réussie !"; 
+		apiError = "Erreur de l'API Google"; 
+		lineError = "Erreur lors de la traduction de la ligne de texte: ";
+	}
+    if (codigoIdioma == "de") {
+		document.title = "Übersetzer für `.tr`-Dateien";
+		heading.textContent = "Übersetzer für `.tr`-Dateien";
+		paragraph.textContent = "Laden Sie Ihre Datei hoch, die in jeder Textzeile das Format English text= enthält.";
+		downloadBtn.textContent = "Übersetzte Datei herunterladen";
+		reading = "Datei wird gelesen und verarbeitet...";  
+		translating = "Textzeile wird übersetzt:";  
+		complete = "Übersetzung erfolgreich abgeschlossen!";  
+		apiError = "Google-API-Fehler";  
+		lineError = "Fehler beim Übersetzen der Textzeile: ";
+	}
+    if (codigoIdioma == "it") {
+		document.title = "Traduttore per file `.tr`";
+		heading.textContent = "Traduttore per file `.tr`";
+		paragraph.textContent = "Carica il tuo file che ha il formato Testo inglese= in ogni riga di testo.";
+		downloadBtn.textContent = "Scarica il file tradotto";
+		reading = "Lettura e processing del file...";
+		translating = "Traduzione della riga di testo:"; 
+		complete = "Traduzione completata con successo!";   
+		apiError = "Errore delle API di Google";   
+		lineError = "Errore durante la traduzione della riga di testo: ";
+	}
+    if (codigoIdioma == "ru") {
+		document.title = "Переводчик для файлов `.tr`";
+		heading.textContent = "Переводчик для файлов `.tr`";
+		paragraph.textContent = "Загрузите файл, в котором каждая строка текста имеет формат английский текст=";
+		downloadBtn.textContent = "Скачать переведенный файл";
+		reading = "Чтение и обработка файла...";    
+		translating = "Перевод строки текста:";    
+		complete = "Перевод успешно завершен!";    
+		apiError = "Ошибка Google API";    
+		lineError = "Ошибка при переводе строки текста: ";
+	}
+    if (codigoIdioma == "ja") {
+		document.title = "`.tr`ファイルの翻訳ツール";
+		heading.textContent = "`.tr`ファイルの翻訳ツール";
+		paragraph.textContent = "各行のテキストに「English text=」という形式が含まれているファイルをアップロードしてください。";
+		downloadBtn.textContent = "翻訳ファイルをダウンロード";
+		reading = "ファイルを読み込み、処理しています...";     
+		translating = "テキストの行を翻訳中:";     
+		complete = "翻訳が正常に完了しました！";     
+		apiError = "Google APIエラー";     
+		lineError = "テキストの行の翻訳エラー: ";
+	}
+    if (codigoIdioma == "ko") {
+		document.title = "`.tr` 파일용 번역기";
+		heading.textContent = "`.tr` 파일용 번역기";
+		paragraph.textContent = "각 줄에 English text= 형식이 포함된 파일을 업로드하세요.";
+		downloadBtn.textContent = "번역된 파일 다운로드";
+		reading = "파일을 읽고 처리하는 중...";      
+		translating = "텍스트 행 번역 중:";      
+		complete = "번역이 성공적으로 완료되었습니다!";      
+		apiError = "Google API 오류";      
+		lineError = "텍스트 행 번역 오류: ";
+	}
+    if (codigoIdioma == "zh") {
+		document.title = "`.tr` 文件翻译器";
+		heading.textContent = "`.tr` 文件翻译器";
+		paragraph.textContent = "上传文件，文件每行文本格式为“英文文本=”。";
+		downloadBtn.textContent = "下载翻译文件";
+		reading = "正在读取并处理文件...";       
+		translating = "正在翻译文本行：";       
+		complete = "翻译成功完成！";       
+		apiError = "Google API 错误";       
+		lineError = "翻译文本行时出错：";
+	}
+    
+    const fileInput = document.getElementById('fileInput');
+    const statusDiv = document.getElementById('status');
+    let finalResultText = ""; // Aquí guardaremos el contenido final
+    let nombre;
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        nombre = event.target.files[0].name;
+        let partes = nombre.split('.');
+        console.log(partes);
+
+        const reader = new FileReader();
+        statusDiv.innerText = reading;
+        downloadBtn.style.display = "none";
+
+        reader.onload = async function(e) {
+            const content = e.target.result;
+            // Dividimos el archivo por líneas (soportando Windows y Linux/Mac)
+            const lines = content.split(/\r?\n/); 
+            const processedLines = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+
+                // Verificamos si la línea termina con "=" (quitando espacios en blanco al final)
+                if (line.trim().endsWith('=')) {
+                    // Extraemos el texto antes del "="
+                    // El replace quita el "=" del final y trim() limpia espacios sobrantes
+                    let textToTranslate = line.slice(0, line.lastIndexOf('=')).trim();
+
+                    if (textToTranslate.length > 0) {
+                        try {
+                            statusDiv.innerText = `${translating} ${i + 1}`;
+                            const translatedText = await translateText(textToTranslate, partes[1]);
+                            // Unimos el texto original, el "=" y la traducción
+                            processedLines.push(`${textToTranslate}=${translatedText}`);
+                        } catch (error) {
+                            console.error(lineError, line, error);
+                            // Si falla, dejamos la línea como estaba
+                            processedLines.push(line);
+                        }
+                    } else {
+                        processedLines.push(line);
+                    }
+                } else {
+                    // Si la línea no termina en "=", la dejamos intacta
+                    processedLines.push(line);
+                }
+            }
+
+            // Unimos todas las líneas procesadas saltando de línea
+            finalResultText = processedLines.join('\n');
+            statusDiv.innerText = complete;
+            downloadBtn.style.display = "inline-block";
+        };
+
+        reader.readAsText(file);
+    });
+
+    // Función nativa para consultar el traductor de Google de forma gratuita
+    async function translateText(text, lang) {
+        // Usamos el endpoint de traducción de Google (idioma origen: auto, destino: es)
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`;
+        
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(apiError);
+        
+        const data = await response.json();
+        // Google devuelve una estructura de arrays anidados; el texto traducido está en la primera posición
+        return data[0][0][0];
+    }
+
+    // Evento para descargar el archivo nuevo modificado
+    downloadBtn.addEventListener('click', function() {
+        const blob = new Blob([finalResultText], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombre;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+</script>
+
+</body>
+</html>
